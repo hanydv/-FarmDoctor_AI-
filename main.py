@@ -1,7 +1,7 @@
 import arabic_reshaper
 from kivy.clock import Clock
 import arabic_reshaper
-import webbrowser 
+import webbrowser
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -14,27 +14,36 @@ from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 from kivy.utils import platform
 
+
 def ask_permissions(self):
-    if platform == 'android':
+    if platform == "android":
         from android.permissions import request_permissions, Permission
-        request_permissions([
-            Permission.CAMERA,
-            Permission.WRITE_EXTERNAL_STORAGE,
-            Permission.READ_EXTERNAL_STORAGE,
-            Permission.INTERNET
-        ])
+
+        request_permissions(
+            [
+                Permission.CAMERA,
+                Permission.WRITE_EXTERNAL_STORAGE,
+                Permission.READ_EXTERNAL_STORAGE,
+                Permission.INTERNET,
+            ]
+        )
+
 
 def get_display(self, text):
-    # دي دالة يدوية بتعكس النص عشان يظهر صح في أندرويد
+
     return text[::-1]
-# محرك التنسيق العربي لضمان ظهور النصوص بشكل صحيح
-def get_tr(self,text):
-    if not text: return ""
+
+
+def get_tr(self, text):
+    if not text:
+        return ""
     import arabic_reshaper
+
     reshaped_text = arabic_reshaper.reshape(text)
     return reshaped_text[::-1]
 
-KV = '''
+
+KV = """
 <ArabicLabel@Label>:
     font_name: "arial.ttf"
     halign: "center"
@@ -61,8 +70,8 @@ ScreenManager:
             Color:
                 rgba: (0.96, 1, 0.96, 1)
             Rectangle:
-                pos: self.pos
-                size: self.size
+                pos: root.pos
+                size: root.size
         
         Label:
             text: "🛡️"
@@ -84,7 +93,7 @@ ScreenManager:
         TextInput:
             id: user_phone
             hint_text: "رقم الموبايل / Phone Number"
-            size_hint_y: None
+            size_hsint_y: None
             height: '50dp'
             multiline: False
             
@@ -120,7 +129,7 @@ ScreenManager:
                 padding: '15dp'
                 spacing: '15dp'
 
-                # التشخيص الذكي
+                
                 GreenButton:
                     text: app.get_tr("التشخيص الذكي الشامل / Smart Diagnosis")
                     height: '100dp'
@@ -130,7 +139,7 @@ ScreenManager:
                     size_hint_y: None
                     height: '50dp'
                     on_release: root.manager.current = 'login'
-                # أزرار التواصل
+                
                 BoxLayout:
                     size_hint_y: None
                     height: '60dp'
@@ -146,12 +155,12 @@ ScreenManager:
                         background_color: (0.1, 0.4, 0.8, 1)
                         on_release: app.open_email()
 
-                # سجل المزرعة
+                
                 GreenButton:
                     text: app.get_tr("سجل المزرعة والتربة / History & Soil")
                     on_release: app.show_history()
 
-                # الأسواق والطقس
+                
                 GridLayout:
                     cols: 2
                     spacing: '12dp'
@@ -171,29 +180,36 @@ ScreenManager:
             height: '40dp'
             font_size: '12sp'
             color: (0.3, 0.3, 0.3, 1)
-'''
+"""
+
 
 class LoginScreen(Screen):
     pass
 
+
 class MainDashboard(Screen):
     pass
+
 
 class FarmDoctorApp(App):
     def build(self):
         return Builder.load_string(KV)
 
     def get_tr(self, text):
-        return self.get_tr(text)
-    
+        if text:
+
+            reshaped_text = arabic_reshaper.reshape(text)
+            return reshaped_text[::-1]
+        return ""
+
     def open_whatsapp(self):
-        webbrowser.open("https://wa.me/201063732596") 
+        webbrowser.open("https://wa.me/201063732596")
 
     def open_email(self):
         webbrowser.open("mailto:hanyk201@gmail.com")
 
     def update_status(self, msg):
-        self.root.get_screen('dashboard').ids.status_label.text = self.get_tr(msg)
+        self.root.get_screen("dashboard").ids.status_label.text = self.get_tr(msg)
 
     def diagnose_action(self):
         self.update_status(self.get_tr("بدء التشخيص الذكي / AI Diagnosis Started"))
@@ -206,8 +222,11 @@ class FarmDoctorApp(App):
 
     def show_weather(self):
         self.update_status(self.get_tr("جلب نشرة الطقس / Getting Weather Data"))
+
     def on_start(self):
-        # بنقول للتطبيق: افتح واستقر الأول، وبعد ثانية اطلب الكاميرا
+
         Clock.schedule_once(lambda dt: self.ask_permissions(), 2)
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     FarmDoctorApp().run()
